@@ -1,21 +1,28 @@
+import { checkUser } from "@/api/auth";
 import { firebaseAuth } from "@/utils/FirebaseConfig";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import React from "react";
 import {FcGoogle} from 'react-icons/fc';
 
 function login() {
 
+  const router = useRouter();
   const handleLogin =  async () => {
     const provider = new GoogleAuthProvider();
     const {user:{displayName:name, email, photoURL: profileImage},} = await signInWithPopup(firebaseAuth, provider);
     
     try {
       if(email){
-        
+        const data = await checkUser({email});
+        console.log(data);
+        if(!data.status){
+          router.push("/onboarding");
+        }
       }
     } catch (error) {
-      
+      console.log(error);
     }
     
   }
