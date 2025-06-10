@@ -1,4 +1,6 @@
 import { checkUser } from "@/api/auth";
+import { reducerCases } from "@/context/constants";
+import { useStateProvider } from "@/context/StateContext";
 import { firebaseAuth } from "@/utils/FirebaseConfig";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Image from "next/image";
@@ -9,6 +11,9 @@ import {FcGoogle} from 'react-icons/fc';
 function login() {
 
   const router = useRouter();
+
+  const [{}, dispatch] = useStateProvider();
+
   const handleLogin =  async () => {
     const provider = new GoogleAuthProvider();
     const {user:{displayName:name, email, photoURL: profileImage},} = await signInWithPopup(firebaseAuth, provider);
@@ -16,8 +21,17 @@ function login() {
     try {
       if(email){
         const data = await checkUser({email});
-        console.log(data);
         if(!data.status){
+          dispatch({tyepe: reducerCases.SET_NEW_USER, newUser: true});
+          dispatch({
+            type: reducerCases.SET_USER_INFO,
+            userInfo:{
+              name,
+              email,
+              profileImage,
+              status:""
+            }
+          })
           router.push("/onboarding");
         }
       }
